@@ -7,12 +7,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The instance of this class is shared between 2 threads: main thread and event
+ * thread (created automatically with zooKeeper object). This requires the 'synchronized'
+ * keyword to avoid race condition when reading ('getAllgetAllServiceAddresses' method, which
+ * may be used later as it is exposed publicly by any thread) and writing to critical section.
+ */
 public class ServiceRegistry implements Watcher {
 
     private static final String REGISTRY_ZNODE = "/service_registry";
     private final ZooKeeper zooKeeper;
     private String currentZnode = null;
-    // shared variable
+    // critical section
     private List<String> allServiceAddresses;
 
     public ServiceRegistry(ZooKeeper zooKeeper) {
@@ -79,6 +85,7 @@ public class ServiceRegistry implements Watcher {
     }
 
     public void unregisterFromCluster() throws InterruptedException, KeeperException {
+        // check if node has already joined cluster
         if (currentZnode != null && zooKeeper.exists(currentZnode, false) != null) {
             zooKeeper.delete(currentZnode, -1);
         }
