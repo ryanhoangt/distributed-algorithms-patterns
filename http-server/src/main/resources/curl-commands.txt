@@ -1,0 +1,4 @@
+curl --request GET -v localhost:8081/status
+curl --request POST -v --data "100,50" localhost:8081/task
+curl --request POST -v --data "100,50" --header "X-Test: true" localhost:8081/task
+curl --request POST -v --data "100,50" --header "X-Debug: true" localhost:8081/task
