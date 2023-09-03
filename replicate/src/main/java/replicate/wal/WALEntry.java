@@ -16,4 +16,20 @@ public class WALEntry {
     public WALEntry(byte[] data) {
         this(-1L, data, EntryType.DATA);
     }
+
+    public Long getEntryIndex() {
+        return entryIndex;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public EntryType getEntryType() {
+        return entryType;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
 }

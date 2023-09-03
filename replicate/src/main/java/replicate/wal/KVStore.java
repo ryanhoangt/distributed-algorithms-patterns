@@ -2,7 +2,9 @@ package replicate.wal;
 
 import replicate.common.Config;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class KVStore {
@@ -31,8 +33,21 @@ public class KVStore {
     }
 
     private void applyLog() {
-        // TODO:
+        List<WALEntry> walEntries = wal.readAll();
+        applyEntries(walEntries);
+    }
 
-        throw new UnsupportedOperationException("Not implemented yet.");
+    private void applyEntries(List<WALEntry> walEntries) {
+        for (WALEntry walEntry: walEntries) {
+            Command cmd = deserialize(walEntry);
+            if (cmd instanceof SetValueCommand) {
+                SetValueCommand setValueCmd = (SetValueCommand) cmd;
+                kv.put(setValueCmd.getKey(), setValueCmd.getValue());
+            }
+        }
+    }
+
+    private Command deserialize(WALEntry walEntry) {
+        return Command.deserializeFrom(new ByteArrayInputStream(walEntry.getData()));
     }
 }

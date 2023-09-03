@@ -2,6 +2,8 @@ package replicate.wal;
 
 import replicate.common.Config;
 
+import java.util.List;
+
 public class WriteAheadLog {
 
     public static WriteAheadLog openWAL(Config config) {
@@ -16,4 +18,9 @@ public class WriteAheadLog {
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 
+    public List<WALEntry> readAll() {
+        // TODO:
+
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }
