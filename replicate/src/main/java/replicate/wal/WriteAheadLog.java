@@ -8,6 +8,9 @@ import java.util.Comparator;
 import java.util.List;
 
 public class WriteAheadLog {
+    static int INT_SIZE_BYTES = 4;
+    static int LONG_SIZE_BYTES = 8;
+
     private Config config;
     private WALSegment openingSegment;
     /**

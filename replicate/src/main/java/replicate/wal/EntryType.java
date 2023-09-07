@@ -10,4 +10,8 @@ public enum EntryType {
     EntryType(int value) {
         this.value = value;
     }
+
+    public int getValue() {
+        return value;
+    }
 }

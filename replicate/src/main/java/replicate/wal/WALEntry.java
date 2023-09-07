@@ -1,5 +1,7 @@
 package replicate.wal;
 
+import java.nio.ByteBuffer;
+
 public class WALEntry {
     private final Long entryIndex;
     private final byte[] data;
@@ -15,6 +17,26 @@ public class WALEntry {
 
     public WALEntry(byte[] data) {
         this(-1L, data, EntryType.DATA);
+    }
+
+    public ByteBuffer toByteBuffer() {
+        int entryBytes = serializedBytes();
+        int bufferSize = WriteAheadLog.INT_SIZE_BYTES + entryBytes; // 4 extra bytes for the size of the log entry
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize); // Big Endian
+        buffer.clear(); // unflip the buffer
+        buffer.putInt(entryBytes);
+        buffer.putInt(entryType.getValue());
+        buffer.putLong(entryIndex);
+        buffer.putLong(timeStamp);
+        buffer.put(data);
+        return buffer;
+    }
+
+    private int serializedBytes() {
+        return data.length +                        // size of data
+                WriteAheadLog.LONG_SIZE_BYTES +     // size of index
+                WriteAheadLog.LONG_SIZE_BYTES +     // size of timestamp
+                WriteAheadLog.LONG_SIZE_BYTES;      // size of entry type
     }
 
     public Long getEntryIndex() {

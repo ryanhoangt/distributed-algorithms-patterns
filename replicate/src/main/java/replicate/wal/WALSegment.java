@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.List;
 
@@ -60,16 +61,31 @@ public class WALSegment {
         return getBaseOffsetFromFileName(file.getName());
     }
 
-    public Long writeEntry(WALEntry entry) {
-        // TODO:
-
-        throw new UnsupportedOperationException("Not implemented yet.");
+    public synchronized Long writeEntry(WALEntry logEntry) {
+        writeToChannel(logEntry.toByteBuffer());
+        return logEntry.getEntryIndex();
     }
 
-    public void flush() {
-        // TODO:
+    private void writeToChannel(ByteBuffer buffer) {
+        try {
+            buffer.flip();
+            while (buffer.hasRemaining())
+                fileChannel.write(buffer);
+            flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        throw new UnsupportedOperationException("Not implemented yet.");
+    /**
+     * Flush updates to the segment to be written to disk.
+     */
+    public synchronized void flush() {
+        try {
+            fileChannel.force(true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public long getLastLogEntryIndex() {
