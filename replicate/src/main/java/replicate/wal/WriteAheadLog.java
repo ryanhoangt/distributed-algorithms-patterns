@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class WriteAheadLog {
     static int INT_SIZE_BYTES = 4;
@@ -18,11 +19,18 @@ public class WriteAheadLog {
      * so that it easier to traverse them to find specific entry.
      */
     private List<WALSegment> sortedSavedSegments;
+    private LogCleaner logCleaner;
 
     private WriteAheadLog(List<WALSegment> segmentsSortedByIndex, Config config) {
         this.sortedSavedSegments = segmentsSortedByIndex;
         this.config = config;
         this.openingSegment = sortedSavedSegments.remove(sortedSavedSegments.size() - 1);
+        this.logCleaner = newLogCleaner(config);
+        this.logCleaner.startUp();
+    }
+
+    private LogCleaner newLogCleaner(Config config) {
+        return new TimeBasedLogCleaner(config, this);
     }
 
     public static WriteAheadLog openWAL(Config config) {
@@ -72,5 +80,20 @@ public class WriteAheadLog {
         }
         walEntries.addAll(openingSegment.readAllEntries());
         return walEntries;
+    }
+
+    public void removeAndDeleteSegment(WALSegment walSegment) {
+        int index = indexOf(walSegment);
+        sortedSavedSegments.remove(index);
+        walSegment.delete();
+    }
+
+    private int indexOf(WALSegment walSegment) {
+        for (int i = 0; i < sortedSavedSegments.size(); i++) {
+            WALSegment segment = sortedSavedSegments.get(i);
+            if (Objects.equals(segment.getBaseOffset(), walSegment.getBaseOffset()))
+                return i;
+        }
+        throw new RuntimeException("No log segment found.");
     }
 }

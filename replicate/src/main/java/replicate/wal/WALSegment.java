@@ -99,4 +99,10 @@ public class WALSegment {
 
         throw new UnsupportedOperationException("Not implemented yet.");
     }
+
+    public void delete() {
+        // TODO:
+
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }

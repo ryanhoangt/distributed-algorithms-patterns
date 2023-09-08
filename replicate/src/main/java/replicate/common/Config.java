@@ -17,4 +17,8 @@ public class Config {
     public Long getMaxLogSegmentSize() {
         return maxLogSegmentSize;
     }
+
+    public long getCleanTaskIntervalMs() {
+        return 1000;
+    }
 }
