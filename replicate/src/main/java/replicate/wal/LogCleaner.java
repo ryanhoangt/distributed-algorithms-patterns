@@ -8,8 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public abstract class LogCleaner {
-    private Config config;
-    private WriteAheadLog wal;
+    protected Config config;
+    protected WriteAheadLog wal;
     private ScheduledExecutorService singleThreadedExecutor = Executors.newScheduledThreadPool(1);
 
     public LogCleaner(Config config, WriteAheadLog wal) {

@@ -96,4 +96,8 @@ public class WriteAheadLog {
         }
         throw new RuntimeException("No log segment found.");
     }
+
+    public List<WALSegment> getSortedSavedSegments() {
+        return sortedSavedSegments;
+    }
 }

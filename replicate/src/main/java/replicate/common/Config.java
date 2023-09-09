@@ -5,6 +5,7 @@ import java.io.File;
 public class Config {
     private String walDir;
     private Long maxLogSegmentSize = Long.MAX_VALUE;
+    private Long logMaxDurationMs = Long.MAX_VALUE;
 
     public Config(String walDir) {
         this.walDir = walDir;
@@ -20,5 +21,9 @@ public class Config {
 
     public long getCleanTaskIntervalMs() {
         return 1000;
+    }
+
+    public Long getLogMaxDurationMs() {
+        return logMaxDurationMs;
     }
 }

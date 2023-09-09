@@ -105,4 +105,10 @@ public class WALSegment {
 
         throw new UnsupportedOperationException("Not implemented yet.");
     }
+
+    public long getLastLogEntryTimestamp() {
+        // TODO:
+
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }
