@@ -6,7 +6,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WALSegment {
     private static String LOG_SUFFIX = ".log";
@@ -15,13 +19,30 @@ public class WALSegment {
     private File file;
     private RandomAccessFile randomAccessFile;
     private FileChannel fileChannel;
+    private Map<Long, Long> entryIndexToOffset = new HashMap<>();
 
     public WALSegment(Long startIndex, File file) {
         this.file = file;
         try {
             this.randomAccessFile = new RandomAccessFile(file, "rw");
             this.fileChannel = randomAccessFile.getChannel();
+            buildOffsetIndex();
         } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void buildOffsetIndex() {
+        try {
+            entryIndexToOffset = new HashMap<>();
+            long totalBytesRead = 0L;
+            var deserializer = new WALEntryDeserializer(fileChannel);
+            while (totalBytesRead < fileChannel.size()) {
+                WALEntry entry = deserializer.readEntry(totalBytesRead);
+                entryIndexToOffset.put(entry.getEntryIndex(), totalBytesRead);
+                totalBytesRead += entry.getLogEntrySize();
+            }
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -89,26 +110,52 @@ public class WALSegment {
     }
 
     public long getLastLogEntryIndex() {
-        // TODO:
-
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return entryIndexToOffset.keySet().stream().max(Long::compareTo).orElse(0L);
     }
 
     public List<WALEntry> readAllEntries() {
-        // TODO:
+        try {
+            Long totalBytesRead = 0L;
+            List<WALEntry> entries = new ArrayList<>();
+            var deserializer = new WALEntryDeserializer(fileChannel);
+            while (totalBytesRead < fileChannel.size()) {
+                WALEntry entry = deserializer.readEntry(totalBytesRead);
+                totalBytesRead += entry.getLogEntrySize(); // size of entry + size of int which stores length
+                entries.add(entry);
+            }
 
-        throw new UnsupportedOperationException("Not implemented yet.");
+            return entries;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    /**
+     * Delete the whole log segment.
+     */
     public void delete() {
-        // TODO:
+        try {
+            fileChannel.close();
+            randomAccessFile.close();
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     public long getLastLogEntryTimestamp() {
-        // TODO:
+        if (entryIndexToOffset.isEmpty()) return 0L;
 
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return readAt(getLastLogEntryIndex()).;
+    }
+
+    private WALEntry readAt(Long entryIndex) {
+        Long filePosition = entryIndexToOffset.get(entryIndex);
+        if (filePosition == null)
+            throw new IllegalStateException("No file position available for entryIndex=" + entryIndex);
+
+        var deserializer = new WALEntryDeserializer(fileChannel);
+        return deserializer.readEntry(filePosition);
     }
 }

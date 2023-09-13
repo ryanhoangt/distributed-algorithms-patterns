@@ -21,7 +21,7 @@ public class WALEntry {
 
     public ByteBuffer toByteBuffer() {
         int entryBytes = serializedBytes();
-        int bufferSize = WriteAheadLog.INT_SIZE_BYTES + entryBytes; // 4 extra bytes for the size of the log entry
+        int bufferSize = getLogEntrySize();
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize); // Big Endian
         buffer.clear(); // unflip the buffer
         buffer.putInt(entryBytes);
@@ -30,6 +30,14 @@ public class WALEntry {
         buffer.putLong(timeStamp);
         buffer.put(data);
         return buffer;
+    }
+
+    /**
+     * Get the total size of the entry being persisted on disk.
+     * Calculate: 4 bytes for size + size of serialized entry.
+     */
+    public Integer getLogEntrySize() {
+        return WriteAheadLog.INT_SIZE_BYTES + serializedBytes();
     }
 
     private int serializedBytes() {
