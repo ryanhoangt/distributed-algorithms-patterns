@@ -12,7 +12,7 @@ public class WALEntry {
         this.entryIndex = entryIndex;
         this.data = data;
         this.entryType = entryType;
-        this.timeStamp = System.currentTimeMillis();
+        this.timeStamp = System.currentTimeMillis(); // FIXME: ignore stored timestamp for now
     }
 
     public WALEntry(byte[] data) {

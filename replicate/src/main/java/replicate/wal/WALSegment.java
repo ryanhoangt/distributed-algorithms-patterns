@@ -147,7 +147,7 @@ public class WALSegment {
     public long getLastLogEntryTimestamp() {
         if (entryIndexToOffset.isEmpty()) return 0L;
 
-        return readAt(getLastLogEntryIndex()).;
+        return readAt(getLastLogEntryIndex()).getTimeStamp();
     }
 
     private WALEntry readAt(Long entryIndex) {
