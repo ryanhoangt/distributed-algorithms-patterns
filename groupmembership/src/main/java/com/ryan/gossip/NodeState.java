@@ -13,4 +13,8 @@ public class NodeState {
     public void add(String key, VersionedValue versionedValue) {
         values.put(key, versionedValue);
     }
+
+    public VersionedValue get(String key) {
+        return values.get(key);
+    }
 }

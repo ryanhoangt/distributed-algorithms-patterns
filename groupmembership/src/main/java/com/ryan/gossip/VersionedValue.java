@@ -9,4 +9,12 @@ public class VersionedValue {
         this.value = value;
         this.version = version;
     }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }
