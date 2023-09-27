@@ -26,6 +26,14 @@ public class InetAddressAndPort {
         }
     }
 
+    public InetAddress getAddress() {
+        return address;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

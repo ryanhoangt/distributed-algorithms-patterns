@@ -1,7 +1,11 @@
 package com.ryan.gossip;
 
 import com.ryan.net.InetAddressAndPort;
+import com.ryan.net.SocketClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -9,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Gossip {
+    private static final Logger logger = LogManager.getLogger(Gossip.class);
+    private final Random rand = new Random();
+    
     private InetAddressAndPort listenAddress;
     private List<InetAddressAndPort> seedNodes;
     private NodeId nodeId;
@@ -58,8 +65,36 @@ public class Gossip {
     }
 
     private void sendGossip(List<InetAddressAndPort> nodeList, int gossipFanout) {
-        // TODO: implement gossip communication using either TCP or UDP
-        
+        if (nodeList.isEmpty()) return;
+
+        for (int i = 0; i < gossipFanout; i++) {
+            InetAddressAndPort nodeAddr = pickRandomNode(nodeList);
+            sendGossipTo(nodeAddr);
+        }
+    }
+
+    private void sendGossipTo(InetAddressAndPort nodeAddr) {
+        try {
+            logger.info("Sending gossip state to: " + nodeAddr);
+            SocketClient socketClient = new SocketClient(nodeAddr);
+            var gossipStateMessage = new GossipStateMessage(this.nodeId, this.clusterMetadata);
+
+            // TODO: serialize the message to bytes in Request object
+
+            // TODO: send the message through the SocketClient instance & wait for response
+
+            // TODO: deserialize the response
+
+            // TODO: merge the response's state map into the local state map
+            
+        } catch (IOException ex) {
+            logger.error("IO error while sending messages to: " + nodeAddr, ex);
+        }
+    }
+
+    private InetAddressAndPort pickRandomNode(List<InetAddressAndPort> nodeList) {
+        int nodeIdx = rand.nextInt(nodeList.size());
+        return nodeList.get(nodeIdx);
     }
 
     private List<InetAddressAndPort> liveNodes() {
