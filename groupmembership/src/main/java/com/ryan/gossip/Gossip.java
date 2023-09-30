@@ -1,5 +1,7 @@
 package com.ryan.gossip;
 
+import com.ryan.common.JsonSerDes;
+import com.ryan.common.Request;
 import com.ryan.net.InetAddressAndPort;
 import com.ryan.net.SocketClient;
 import org.apache.logging.log4j.LogManager;
@@ -80,16 +82,21 @@ public class Gossip {
             var gossipStateMessage = new GossipStateMessage(this.nodeId, this.clusterMetadata);
 
             // TODO: serialize the message to bytes in Request object
+            Request request = createPushGossipStateRequest(gossipStateMessage);
 
             // TODO: send the message through the SocketClient instance & wait for response
 
             // TODO: deserialize the response
 
             // TODO: merge the response's state map into the local state map
-            
+
         } catch (IOException ex) {
             logger.error("IO error while sending messages to: " + nodeAddr, ex);
         }
+    }
+
+    private Request createPushGossipStateRequest(GossipStateMessage gossipStateMessage) {
+        return new Request(RequestType.PushGossipState.getId(), JsonSerDes.serialize(gossipStateMessage));
     }
 
     private InetAddressAndPort pickRandomNode(List<InetAddressAndPort> nodeList) {
